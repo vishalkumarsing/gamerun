@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sports Performance Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --surface-elevated: #f5f5f5;
+      --text-primary: #0a0a0a;
+      --text-secondary: #525252;
+      --text-tertiary: #737373;
+      --border: #e5e5e5;
+      --border-strong: #d4d4d4;
+      --accent: #2A5B9C;
+      --accent-hover: #234a7d;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 0 24px 8px;
+      min-height: 100vh;
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .dashboard-header {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+      margin-bottom: 12px;
+      padding: 4px 0 8px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .dashboard-header h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .dashboard-header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    /* Sport Tabs */
+    .sport-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .sport-tab {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sport-tab::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(0,0,0,0.02));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .sport-tab:hover::before {
+      opacity: 1;
+    }
+
+    .sport-tab:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .sport-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .sport-tab.active .sport-name {
+      color: white;
+    }
+
+    .sport-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: block;
+      transition: filter 0.2s;
+    }
+
+    .sport-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+      transition: color 0.2s;
+    }
+
+    /* Report Type Selector */
+    .report-type-selector {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .report-type-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .report-type-tabs {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .report-type-tab {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .report-type-tab:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .report-type-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Main Layout */
+    .dashboard-content {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      min-height: 600px;
+    }
+
+    /* Reports Sidebar */
+    .reports-sidebar {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .sidebar-title {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .sidebar-subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .report-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .report-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .report-card:hover {
+      border-color: var(--border-strong);
+      transform: translateX(4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .report-card.active {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, #f0f7ff, white);
+    }
+
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .report-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+
+    .report-tag {
+      background: var(--text-primary);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .report-card.active .report-tag {
+      background: var(--accent);
+    }
+
+    .report-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Preview Panel */
+    .preview-panel {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-header {
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .preview-kicker {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--text-tertiary);
+      margin-bottom: 12px;
+    }
+
+    .preview-title {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      margin-bottom: 12px;
+    }
+
+    .preview-desc {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 65ch;
+      line-height: 1.6;
+    }
+
+    /* Player Information Section */
+    .player-info-section {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .player-info-section.show {
+      display: block;
+    }
+
+    .player-info-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .player-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+    }
+
+    .player-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .player-info-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+    }
+
+    .player-info-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .jersey-color-badge {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .metric-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .metric-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
+
+    .metric-value {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .metric-footer {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* Table Styles */
+    .mechanics-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .mechanics-table th {
+      background: var(--accent);
+      color: white;
+      padding: 16px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      border: 2px solid var(--accent);
+    }
+
+    .mechanics-table td {
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .mechanics-table tr:nth-child(even) {
+      background: var(--surface);
+    }
+
+    .mechanics-table tr:hover {
+      background: #f0f7ff;
+    }
+
+    .rating-cell {
+      font-weight: 800;
+      font-size: 18px;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      animation: fadeIn 0.2s;
+    }
+
+    .modal.open {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-panel {
+      position: relative;
+      width: min(960px, calc(100vw - 48px));
+      margin: 5vh auto;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 28px 32px 24px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .modal-title-section h2 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .modal-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .modal-close {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--border);
+      border-color: var(--border-strong);
+    }
+
+    .modal-content {
+      padding: 28px 32px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .modal-section {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .modal-section h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .modal-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-list li {
+      background: white;
+      border: 2px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+
+    .modal-footer {
+      padding: 20px 32px 28px;
+      border-top: 2px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--text-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text-primary);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .dashboard-content {
+        grid-template-columns: 1fr;
+      }
+
+      .sport-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .sport-tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-title {
+        font-size: 24px;
+      }
+
+      .player-info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .report-type-tabs {
+        flex-direction: column;
+      }
+
+      .report-type-tab {
+        width: 100%;
+      }
+
+      .mechanics-table {
+        font-size: 12px;
+      }
+
+      .mechanics-table th,
+      .mechanics-table td {
+        padding: 10px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <h1>Performance Analytics</h1>
+      <p>Professional sports reporting & insights dashboard</p>
+    </div>
+
+    <!-- Sport Tabs -->
+    <div class="sport-tabs" id="sportTabs">
+      <div class="sport-tab active" data-sport="icehockey">
+        <span class="sport-icon">🏒</span>
+        <div class="sport-name">Ice Hockey</div>
+      </div>
+      <div class="sport-tab" data-sport="baseball">
+        <span class="sport-icon">⚾</span>
+        <div class="sport-name">Baseball</div>
+      </div>
+      <div class="sport-tab" data-sport="basketball">
+        <span class="sport-icon">🏀</span>
+        <div class="sport-name">Basketball</div>
+      </div>
+      <div class="sport-tab" data-sport="soccer">
+        <span class="sport-icon">⚽</span>
+        <div class="sport-name">Soccer</div>
+      </div>
+      <div class="sport-tab" data-sport="fencing">
+        <span class="sport-icon">🤺</span>
+        <div class="sport-name">Fencing</div>
+      </div>
+      <div class="sport-tab" data-sport="softball">
+        <span class="sport-icon">🥎</span>
+        <div class="sport-name">Softball</div>
+      </div>
+    </div>
+
+    <!-- Report Type Selector -->
+    <div class="report-type-selector" id="reportTypeSelector">
+      <div class="report-type-header" id="reportTypeHeader">REPORT TYPE</div>
+      <div class="report-type-tabs" id="reportTypeTabs"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+      <!-- Reports Sidebar -->
+      <aside class="reports-sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">
+            <span class="status-dot"></span>
+            <span id="sidebarSportName">Ice Hockey</span> Reports
+          </div>
+          <div class="sidebar-subtitle">Select a report to preview</div>
+        </div>
+        <div class="report-cards" id="reportCards"></div>
+      </aside>
+
+      <!-- Preview Panel -->
+      <section class="preview-panel">
+        <div class="preview-header">
+          <div class="preview-kicker" id="previewKicker">ICE HOCKEY</div>
+          <h2 class="preview-title" id="previewTitle">Player Performance Snapshot</h2>
+          <p class="preview-desc" id="previewDesc">
+            Select a report from the sidebar to view detailed insights and metrics.
+          </p>
+        </div>
+        
+        <!-- Player Information Section -->
+        <div class="player-info-section" id="playerInfoSection">
+          <div class="player-info-title">Player Information</div>
+          <div class="player-info-grid" id="playerInfoGrid"></div>
+        </div>
+        
+        <div class="metrics-grid" id="metricsGrid"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div class="modal-title-section">
+          <h2 id="modalTitle">Report Title</h2>
+          <p class="modal-subtitle" id="modalSubtitle">Report details and insights</p>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-content" id="modalContent"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        <button class="btn btn-primary" id="modalAction">Take Action</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Player Information Data
+    const PLAYER_INFO = {
+      icehockey: {
+        name: "Jack Chesser",
+        jerseyNumber: "15",
+        jerseyColor: "Red",
+        age: "11",
+        position: "Defense",
+        shot: "Right",
+        level: "Youth AAA"
+      },
+      baseball: {
+        hitting: {
+          name: "Joe Carrras",
+          age: "17",
+          height: "5'8\" (68 inches)",
+          weight: "155 lbs",
+          batsThrows: "R/R",
+          level: "Level 7 (17u)"
+        },
+        pitching: {
+          name: "Greg Max",
+          age: "16",
+          height: "70 inches",
+          weight: "155 lbs",
+          throwsBats: "Right/Right",
+          level: "Youth AAA"
+        }
+      },
+      basketball: {
+        name: "Brett Stevens",
+        jerseyNumber: "23",
+        jerseyColor: "White",
+        age: "11",
+        position: "Point Guard",
+        shoots: "Right",
+        level: "Youth AAA"
+      },
+      soccer: {
+        name: "Declan Donigher",
+        jerseyNumber: "7",
+        jerseyColor: "Black",
+        age: "17",
+        position: "Center Forward",
+        foot: "Right/Left",
+        level: "USL Academy U20/U19"
+      },
+      fencing: {
+        name: "Brett Stevens",
+        jerseyNumber: "7",
+        jerseyColor: "White",
+        age: "11",
+        position: "Épée",
+        hand: "Right",
+        level: "Youth AAA"
+      },
+      softball: {
+        name: "Brett Stevens",
+        jerseyNumber: "8",
+        jerseyColor: "Yellow",
+        age: "11",
+        position: "Catcher",
+        bats: "Right",
+        level: "Youth AAA"
+      }
+    };
+
+    // Jersey color mapping
+    const JERSEY_COLORS = {
+      Red: "#dc2626",
+      Blue: "#2A5B9C",
+      White: "#ffffff",
+      Green: "#16a34a",
+      Yellow: "#eab308",
+      Black: "#0a0a0a"
+    };
+
+    // Report Types Configuration
+    const REPORT_TYPES = {
+      icehockey: [
+        { id: 'individual_120', name: 'Individual Analysis - 120 Min' },
+        { id: 'individual_15', name: 'Individual Analysis - 15 Min' }
+      ],
+      baseball: [
+        { id: 'hitting', name: 'Hitting Report' },
+        { id: 'pitching', name: 'Pitching Report' }
+      ],
+      basketball: [
+        { id: 'individual_110', name: 'Individual Analysis - 110 Min' }
+      ],
+      soccer: [
+        { id: 'goalkeeper', name: 'Goalkeeper Analysis' },
+        { id: 'shooting', name: 'Shooting Analysis' }
+      ],
+      fencing: [
+        { id: 'full_game', name: 'Full Game Analysis' }
+      ],
+      softball: [
+        { id: 'hitting_analysis', name: 'Softball Hitting Analysis' }
+      ]
+    };
+    
+
+    // Data structure - I'll include a shortened version for brevity
+    // In your actual implementation, keep all the DATA as before
+    const DATA = {
+      icehockey: {
+        individual_120: [
+          { 
+            title: "Player Information", 
+            tag: "Overview", 
+            desc: "Comprehensive player profile and analysis overview.", 
+            content: "Player: Jack Chesser\nJersey Number: 15\nPosition: Defense\nTeam Jersey Color: Red\nAnalysis Video Length: 00:57:25\n\nThis report provides a comprehensive analysis of Jack Chesser's performance, based on observations from the provided video. The evaluation focuses on key areas of ice hockey skill and acumen, with an emphasis on identifying opportunities for development.",
+            metrics: [
+              ["Player Name", "Jack Chesser"], 
+              ["Jersey Number", "15"], 
+              ["Position", "Defense"], 
+              ["Video Length", "00:57:25"]
+            ]
+          },
+          { 
+            title: "Skating Mechanics and Mobility", 
+            tag: "Skating", 
+            desc: "Forward propulsion, backward mobility, and agility analysis.", 
+            content: "Forward Propulsion:\nThe player's initial acceleration from a standstill is functional for this level of play. The first 3-5 strides show moderate power but could be more explosive to more effectively close gaps on defense or create separation with the puck. The forward stride mechanics are developing; while the stride length is adequate, focusing on a deeper knee bend—closer to a 45-degree angle—would generate significantly more power per push. The return rate of the skates under the body is steady but could be quicker to increase overall top speed.\n\nBackward Mobility and Transitions:\nBackward skating demonstrates a solid foundation. The player maintains good balance and a stable base, allowing him to handle incidental contact without losing his footing. Gap control is generally effective, as he can match the speed of most oncoming attackers. To improve, the focus should be on taking away space more proactively rather than passively skating backward. Pivoting from backward to forward is performed adequately, though there is a noticeable decrease in momentum during transitions. Improving the efficiency of these turns will allow for quicker defensive reactions and offensive breakouts.\n\nAgility and Edge Work:\nThe player navigates the ice with competence, showing the ability to move laterally and change direction. Crossovers are utilized during turns and acceleration in both forward and backward skating. However, these could be executed with more power and fluidity to enhance speed out of turns. Overall footwork is sufficient for maneuvering in various game situations, forming a strong base for future development in edge control and agility.",
+            metrics: [
+              ["Acceleration", "Moderate"], 
+              ["Stride Power", "Developing"], 
+              ["Backward Skating", "Solid"], 
+              ["Agility", "Competent"]
+            ]
+          },
+          { 
+            title: "Puck Skills and Distribution", 
+            tag: "Skills", 
+            desc: "Stickhandling, passing, and receiving analysis.", 
+            content: "Stickhandling:\nThe player demonstrates a clear comfort level with handling the puck on his forehand, carrying it with confidence when space is available. The wrist roll appears natural on this side. Puck control on the backhand is less developed and appears to be an area requiring more practice to build confidence. Under defensive pressure, the player tends to rely on simple, safe puck movements rather than evasive maneuvers. Developing a stronger backhand and more deceptive puck-handling skills would add another dimension to his game.\n\nPassing and Receiving:\nPassing skills are reliable for making short to medium-range plays. Passes are typically flat and directed accurately to teammates' sticks, primarily on the forehand. The player consistently makes the safe, high-percentage pass. The ability to receive passes is solid, particularly for soft or moderately paced passes on both the forehand and backhand. Difficulty was observed when attempting to control hard passes, which sometimes bounced off the stick blade. Working on 'cushioning' the puck upon reception will improve control and allow for a smoother transition to the next play.",
+            metrics: [
+              ["Forehand Control", "Confident"], 
+              ["Backhand Control", "Developing"], 
+              ["Passing Accuracy", "Reliable"], 
+              ["Puck Reception", "Solid"]
+            ]
+          },
+          { 
+            title: "Shooting and Offensive Contributions", 
+            tag: "Offense", 
+            desc: "Shooting mechanics and offensive zone contributions.", 
+            content: "As a defenseman, opportunities to shoot were limited in the observed game. The primary shot utilized was a forehand wrist shot from the blue line.\n\nWrist Shot:\nThe release is deliberate rather than rapid. The shots are directed towards the net area but lack significant velocity, categorizing them as soft to average in hardness. At present, the shot is not a significant scoring threat from a distance, serving more to put the puck in a playable area for forwards.\n\nOther Shots:\nNo instances of snap shots, slap shots, backhand shots, or one-timers were observed during the analysis period. The player did not frequently venture to the net front for redirections. To become a more versatile offensive contributor from the defensive position, developing a quicker release and increasing shot power should be a key focus.",
+            metrics: [
+              ["Shot Type", "Wrist Shot"], 
+              ["Shot Power", "Average"], 
+              ["Shot Accuracy", "Adequate"], 
+              ["Release Speed", "Deliberate"]
+            ]
+          },
+          { 
+            title: "Physical Engagement and Puck Protection", 
+            tag: "Physical", 
+            desc: "Body positioning, strength, and puck battle analysis.", 
+            content: "Note: This analysis is based on legal body contact and positioning as per Youth Recreational league rules (2025-2029 Official Rules of Ice Hockey), which prohibit body checking.\n\nWillingness to Engage:\nThe player displays a consistent willingness to engage in physical contests for the puck. He does not shy away from battles along the boards or in front of his own net. He proactively uses his body to shield the puck and legally separate opponents from it. His approach is assertive but controlled, and he did not take any unnecessary penalties related to physical contact.\n\nStrength and Balance:\nThe player has a strong base and maintains good balance when engaged with opponents. He is not easily knocked off the puck and can hold his ground effectively in one-on-one situations. When receiving contact, he absorbs it well and often remains on his feet, demonstrating solid core strength and stability.",
+            metrics: [
+              ["Engagement", "Consistent"], 
+              ["Balance", "Strong"], 
+              ["Puck Protection", "Effective"], 
+              ["Penalties", "0"]
+            ]
+          },
+          { 
+            title: "Hockey IQ and Positional Play", 
+            tag: "IQ", 
+            desc: "Defensive awareness, offensive decision-making, and game sense.", 
+            content: "Defensive Play:\nThe player demonstrates a strong understanding of his defensive responsibilities. He consistently maintains proper positioning by staying between the puck carrier and his net. He is effective at keeping attackers to the outside and understands the concept of protecting the 'house' (the high-danger area in front of the goal). His stick positioning is generally sound for blocking passing lanes, though it could be more active and disruptive. He works well within the team's defensive structure.\n\nOffensive Play:\nIn the offensive zone, the player responsibly holds the blue line, preventing pucks from clearing the zone. He supports his teammates by making himself available for a pass but does not frequently join the offensive rush. His decision-making with the puck is conservative, prioritizing puck possession and safe plays over high-risk, high-reward opportunities.\n\nEffort and Game Sense:\nA consistent high level of effort is evident in all three zones. The player works hard to get back on defense and actively seeks to regain puck possession. He reads the developing play at an average level for his age group, generally anticipating the next logical step. Decision-making under pressure is safe and reliable; he rarely turns the puck over in critical areas.",
+            metrics: [
+              ["Defensive IQ", "Strong"], 
+              ["Positioning", "Excellent"], 
+              ["Effort Level", "High"], 
+              ["Decision Making", "Safe"]
+            ]
+          },
+          { 
+            title: "Player Scorecard", 
+            tag: "Scores", 
+            desc: "Comprehensive rating across all key performance areas.", 
+            content: "Performance ratings on a scale of 1-10, where 10 represents elite performance for the age group.",
+            metrics: [
+              ["Defensive Positioning", "7"], 
+              ["Backward Skating", "6"], 
+              ["Gap Control", "6"], 
+              ["Physical Engagement", "7"],
+              ["Effort / Work Rate", "7"],
+              ["Forward Skating", "5"],
+              ["Puck Control", "5"],
+              ["Passing / Distribution", "6"],
+              ["Shooting", "4"],
+              ["Offensive Zone IQ", "6"]
+            ]
+          }
+        ],
+        individual_15: [
+          { 
+            title: "Quick Performance Check", 
+            tag: "Fast", 
+            desc: "15-min snapshot of key metrics.", 
+            metrics: [
+              ["Shots on Goal", "3"], 
+              ["Ice Time", "4:32"], 
+              ["Shift Quality", "A"], 
+              ["Energy Level", "High"]
+            ]
+          },
+          { 
+            title: "Speed Analysis", 
+            tag: "Speed", 
+            desc: "Burst speed and acceleration check.", 
+            metrics: [
+              ["Top Speed", "28.9 km/h"], 
+              ["Avg Speed", "18.2 km/h"], 
+              ["Acceleration", "0.89"], 
+              ["Deceleration", "0.91"]
+            ]
+          },
+          { 
+            title: "Goalie Reaction Breakdown", 
+            tag: "Goalie", 
+            desc: "Reaction time + positioning snapshots.", 
+            metrics: [
+              ["Avg Reaction", "0.34s"], 
+              ["Save %", "91%"], 
+              ["Rebound Control", "B+"], 
+              ["Angles", "A-"]
+            ]
+          }
+        ]
+      },
+      baseball: {
+        hitting: [
+          { 
+            title: "Phase of Development Profile", 
+            tag: "Overview", 
+            desc: "Player profile and developmental information.", 
+            content: "",
+            metrics: [
+              ["Player Name", "Joe Carrras"], 
+              ["Age", "17"], 
+              ["Height", "5'8\" (68 inches)"], 
+              ["Weight", "155 lbs"],
+              ["Bats/Throws", "R/R"],
+              ["Developmental Level", "Level 7 (17u)"]
+            ],
+            showPlayerInfo: true
+          },
+          { 
+            title: "Hitting Mechanics Evaluation", 
+            tag: "Mechanics", 
+            desc: "Comprehensive breakdown of swing mechanics and fundamentals.", 
+            showTable: true,
+            tableData: {
+              headers: ["Category", "Component", "Rating ", "Coach's Notes"],
+              rows: [
+                ["Fundamentals", "Head position", "4", "Head stays relatively still and down through contact."],
+                ["Fundamentals", "Stance - Open/Closed, Athletic", "4", "Starts in a solid, athletic base with feet slightly wider than shoulders."],
+                ["Fundamentals", "Stride and Timing of front foot", "3", "Uses a moderate leg kick for timing; lands slightly open."],
+                ["Fundamentals", "Balanced at front foot strike", "4", "Maintains good balance and posture as the front foot lands."],
+                ["Fundamentals", "Load and separation", "3", "Creates some separation, but a slight front arm bar limits optimal torque."],
+                ["Fundamentals", "Hip Drive: back knee to front heel", "3", "Hips initiate the rotation, but could be more explosive."],
+                ["Fundamentals", "Front leg - Locked or Bent", "4", "Front leg braces firmly, providing a stable base for rotation."],
+                ["Fundamentals", "Hand Position", "3", "Hands start in a good launch position but create a slight bar during the load."],
+                ["Fundamentals", "Posture (Leaning in towards ball)", "4", "Maintains a consistent and athletic spine angle throughout the swing."],
+                ["Fundamentals", "Staying centered thru swing", "4", "Rotates around a stable center axis without significant forward lunging."],
+                ["Fundamentals", "Front side open or closed", "2", "Front shoulder pulls open prematurely, causing a loss of power and direction."],
+                ["Fundamentals", "Swing mechanics", "3", "Sequencing is adequate but inefficient due to early shoulder rotation."],
+                ["Fundamentals", "Bat path", "3", "Path can get long to the ball; needs to be more direct."],
+                ["Fundamentals", "Keep hands inside ball", "3", "Difficulty keeping hands tight to the body due to the front side pulling off."],
+                ["Fundamentals", "Palm up / palm down", "4", "Maintains proper hand orientation through the contact zone."],
+                ["Fundamentals", "Bat extension thru baseball", "3", "Extension is limited by the rotational inefficiency; doesn't stay through the ball."],
+                ["Advanced", "Head at contact", "4", "Head is quiet and positioned behind the point of contact."],
+                ["Advanced", "Back shoulder dropping too much", "4", "Back shoulder works on a good plane under the front shoulder."],
+                ["Advanced", "How long is Barrel in zone", "3", "Barrel gets on plane but exits the hitting zone prematurely."],
+                ["Advanced", "Plate coverage", "2", "Early opening of the front side will create holes on the outer half."]
+              ]
+            }
+          },
+          { 
+            title: "Summary, Scoring, and Recommendations", 
+            tag: "Summary", 
+            desc: "Overall evaluation, performance scores, and corrective drills.", 
+            content: "Overall Summary\n\nStrengths:\nThe hitter demonstrates a solid athletic foundation with good balance and posture throughout the swing. He effectively keeps his head still and braces his front side, which are key components for consistent contact and power transfer.\n\nAreas for Improvement:\nThe primary mechanical flaw is the tendency for the front shoulder to pull open too early. This leads to a loss of rotational power, a longer bat path, and difficulty covering the outside part of the plate. Correcting this will improve bat speed and power to all fields.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nPerformance Scores (Based on Rubric)\n\nCurrent Mechanics Rating: 30 - Division 3 mechanics\nProjected Level of Play: 35 - Division 2\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nRecommended Drills\n\n1. Drill #1: Fence Drill (or Front Side Closed Drill)\nFocus: To prevent the front shoulder from flying open and to promote a more connected, rotational swing.\nExecution: Stand with your back a bat's length away from a fence or net. Take swings without letting the bat hit the fence behind you. This forces you to keep your hands in and rotate tightly without casting.\n\n2. Drill #2: Connection Ball Drill\nFocus: To correct the front arm bar during the load and keep the upper body connected.\nExecution: Place a small, soft ball or a rolled-up towel in the lead armpit (left armpit for a right-handed hitter). Take dry swings, focusing on keeping the ball in place until the hands start moving forward to hit.\n\n3. Drill #3: Opposite Field Tee Work\nFocus: To develop the feel of staying through the baseball and keeping the front side closed longer.\nExecution: Place a tee on the outer third of the plate. Focus on hitting line drives to the opposite field gap. This requires the barrel to stay in the zone longer and prevents pulling off the ball.",
+            metrics: []
+          }
+        ],
+        pitching: [
+          { 
+            title: "Player Information", 
+            tag: "Profile", 
+            desc: "Player profile and basic information.", 
+            content: "",
+            metrics: [
+              ["Player Name", "Greg Max"], 
+              ["Age", "16"], 
+              ["Height", "70 inches"], 
+              ["Weight", "155 lbs"],
+              ["Throws/Bats", "Right/Right"]
+            ],
+            showPlayerInfo: true
+          },
+          { 
+            title: "Pitching Mechanics Evaluation", 
+            tag: "Mechanics", 
+            desc: "Comprehensive breakdown of pitching mechanics.", 
+            content: "Head Posture\n\nLevelness: The pitcher maintains a relatively stable and level head position from leg lift through the stride. There is no excessive or inefficient tilting. This is a strength.\n\nDirection: The head and eyes stay directed towards the target well into the delivery. There is a slight pull off towards the glove side late in the follow-through, which is likely a symptom of other mechanical issues rather than a primary flaw.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nLeg Lift & Stride\n\nLeg Lift Height: The leg lift is controlled and reaches a moderate height, approximately waist to mid-chest level. Balance is maintained well at the apex of the lift.\n\nStride Phase Distance: The stride length appears adequate, likely around 80-85% of the pitcher's height. It facilitates a good weight transfer without over-striding.\n\nStride Direction: The stride is consistently online with home plate. The pitcher does not 'step in the bucket' or excessively cross over.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nBalance & Foundation\n\nBalance at Front Foot Strike: The pitcher lands in a balanced position with the head centered over the body. The front foot lands just before the upper body begins its primary rotation, indicating proper sequencing.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nSeparation & Torque\n\nLead and Separation: This is a notable strength. At front foot strike, the hips have begun to open towards the plate while the shoulders remain closed. This creates good separation (hip-shoulder separation), which is a primary source of velocity.\n\nLead Hand Direction: The glove side action is an area for improvement. The lead hand pulls down and away from the body aggressively, which can cause the shoulders to open slightly prematurely and contribute to the head pulling off-target post-release.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nPower Generation & Transfer\n\nHip Drive: The back leg drive could be more forceful. While there is rotation, the back knee tends to drop down more than it drives forward and through, limiting the amount of linear power generated from the ground.\n\nTrunk (Upper Body): The trunk remains closed effectively, capitalizing on the hip-shoulder separation. The posture is generally good, though the aggressive glove-side pull introduces some lateral tilt.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nLanding & Release\n\nFront Leg - Lockout or Bent: This is a primary area for improvement. The front leg lands bent and continues to flex forward through ball release. It never achieves a firm brace or 'lockout'. This is a significant energy leak, as the front leg absorbs power instead of transferring it up the kinetic chain to the arm.\n\nArm Position at Front Foot Landing: The throwing arm is in a good position at foot strike, with the elbow near 90 degrees of flexion and the ball up, ready to initiate the throwing motion.\n\nHead Position (Landing & Release): The head remains steady and behind the front foot through the release point, which is a positive attribute for maintaining sight and balance.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nFollow Through\n\nArm Follow Thru: The arm follows a full and natural deceleration path across the body, indicating a lack of restriction and reducing stress on the shoulder.",
+            metrics: []
+          },
+          { 
+            title: "Summary & Ratings", 
+            tag: "Summary", 
+            desc: "Evaluation summary and performance ratings.", 
+            content: "Evaluation Summary\n\nPrimary Strengths\n\nHip-Shoulder Separation: The ability to separate the lower half rotation from the upper half is well-developed and serves as the foundation for velocity potential.\n\nBalance and Tempo: The delivery is controlled and balanced through the leg lift and stride, creating a repeatable starting point.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nPrimary Areas for Improvement\n\nLack of Front Leg Bracing: The most critical flaw. The bent, unstable front knee at release significantly reduces power transfer and velocity.\n\nPassive Back Leg Drive: More explosive power can be generated from the ground by improving the drive and intent of the back leg and hip.\n\nGlove Side Control: A less aggressive glove-side pull would improve rotational efficiency and help maintain direction through the target.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nRatings\n\nOverall Mechanics Rating: 30 - Division 3 mechanics\nJustification: The pitcher demonstrates a key high-level skill in hip-shoulder separation, but this is counteracted by a fundamental energy leak in the lack of a firm front leg brace. This inefficiency currently caps the mechanical ceiling at a lower collegiate level.\n\nEstimated Level of Play: 25 - Juco Level\nJustification: Based on the current mechanics, the pitcher projects as a solid high school player with the tools to compete at the junior college level. Addressing the key mechanical flaws is necessary to advance to a higher level of collegiate play.",
+            metrics: []
+          },
+          { 
+            title: "Corrective Drills", 
+            tag: "Drills", 
+            desc: "Recommended exercises to improve mechanics.", 
+            content: "Recommended Drills\n\n1. Reverse Rocker Drill\nPurpose: To teach the feeling of landing on and bracing against a firm front leg.\nExecution: Start with feet in the landing position, rock back onto the rear leg, then drive forward aggressively into a firm front side to throw. This isolates and reinforces the bracing action.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n2. Step-Behind Drill\nPurpose: To promote a more dynamic lower half and aggressive hip rotation.\nExecution: Start by standing sideways to the target, step behind your back leg with your front leg, then uncoil explosively to stride and throw. This exaggerates the hip drive needed for power.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n3. Glove Side 'Tuck and Turn' Drill\nPurpose: To improve front side stability and control.\nExecution: Perform throws (can be towel drills or with a ball) focusing specifically on bringing the glove to the chest/rib cage area instead of pulling it down and away. This keeps the shoulders from rotating prematurely and maintains posture.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n4. King of the Hill / Back Foot Drive Focus\nPurpose: To enhance power generation from the ground up.\nExecution: Without a specific training tool, the focus is on consciously driving the instep of the back foot into the pitching rubber as long as possible to create linear force before rotating.",
+            metrics: []
+          },
+          { 
+            title: "Overall Grade", 
+            tag: "Grade", 
+            desc: "Final evaluation grade card.", 
+            content: "Evaluation Grade Card",
+            metrics: [
+              ["Key Strength", "Hip-Shoulder Separation - Positive"],
+              ["Primary Flaw", "Lack of Front Leg Bracing - Needs Immediate Attention"],
+              ["Overall Mechanics", "Solid foundation with significant energy leaks - 30/80"],
+              ["Projected Level", "Current mechanics project to Juco/D3 level - 25/80"]
+            ],
+            showSummary: true,
+            summaryText: "The pitcher has a projectable frame and a good feel for creating rotational energy. However, his inability to transfer that energy through a firm front leg is the single biggest inhibitor to his velocity and overall potential. A dedicated focus on lower-half mechanics, particularly front leg stability, will unlock significant gains."
+          }
+        ]
+      },
+
+      //basketball
+      basketball: {
+        individual_110: [
+            {
+  title:"Phase of Development Profile",
+  tag: "Overview",
+  desc: "Player profile and developmental information.",
+  metrics: [
+    ["Player Name", "Alex Morgan"], 
+    ["Age", "21"],
+    ["Grade", "Junior"],
+    ["Team", "University Division I Program"],
+    ["Position", "Power Forward"],
+    ["Jersey Color", "White"],
+    ["Jersey Number", "24"],
+    ["Height", "73 inches (6'1\")"],
+    ["Wingspan", "74 inches"],
+    ["Dominant Hand", "Right Handed"],
+    ["Gender", "Female"],
+    ["Level of Play", "College Division I (D1)"],
+    ["Video Length", "01:05:07"]
+  ],
+  showPlayerInfo: true
+  
+},
+          {
+  title: "Athleticism & Body Control",
+  tag: "Athleticism",
+  desc: "Movement quality, balance, and physical control.",
+  content: "Acceleration & First Step: Average. Functional but not explosive; does not rely on burst to create separation.\n\nAgility & Directional Changes: Controlled and effective off-ball, lacks elite shiftiness with the ball.\n\nStride Mechanics & Lateral Movement: Solid running mechanics in transition; lateral quickness adequate vs similar-sized players but challenged by quicker guards.\n\nTriple Threat Readiness: Excellent. Consistently catches in a low, athletic stance ready to shoot, pass, or drive.\n\nPhysicality & Contact Balance: Strong core balance; fights through contact on rebounds and maintains shooting balance."
+},
+
+/* 2 */
+{
+  title: "Ball Control & Handling",
+  tag: "BallHandling",
+  desc: "Dribble control and security.",
+  content: "Strong Hand Confidence: Confident with right hand for 1–2 dribbles to attack closeouts.\n\nWeak Hand Usage: Very limited. Almost exclusively right hand.\n\nDribble Under Pressure: Susceptible to pressure; tends to pick up dribble.\n\nKill Dribbles / Game: Dribble used economically to set up shots or simple drives.\n\nBall Protection & Deception: Keeps ball close but lacks advanced deceptive moves; relies on shot fakes."
+},
+
+/* 3 */
+{
+  title: "Passing & Playmaking",
+  tag: "Passing",
+  desc: "Decision-making and ball movement.",
+  content: "Assist-to-Usage Ratio: Low. Role is scorer and floor spacer.\n\nSecondary (Hockey) Assists: Effective quick ball movement on perimeter.\n\nPotential Assists per Game: Low.\n\nPassing Vision: Good for perimeter and simple post entries; limited advanced reads.\n\nDecision-Making in Traffic: Solid and conservative; avoids risky passes."
+},
+
+/* 4 */
+{
+  title: "Shooting Profile",
+  tag: "Shooting",
+  desc: "Form, mechanics, and shot profile.",
+  content: "Shot Mechanics: Highly consistent and repeatable.\n\nRelease: Quick, fluid, high set point.\n\nOverall: Elite catch-and-shoot mechanics from catch to follow-through."
+},
+
+/* 5 */
+{
+  title: "Finishing Ability",
+  tag: "Finishing",
+  desc: "Rim efficiency and contact scoring.",
+  content: "Strong Side Finishing: Effective right-hand finisher, uses backboard well.\n\nWeak Side Finishing: Avoids left-hand finishes, leading to tougher angles.\n\nFinishing Through Contact: Good strength on put-backs and straight-line drives.\n\nRim Touches: Moderate; mainly from cuts, rebounds, or slow closeouts.\n\nFloaters: Not part of offensive package."
+},
+
+/* 6 */
+{
+  title: "Off-Ball Offense",
+  tag: "OffBall",
+  desc: "Movement, spacing, and IQ.",
+  content: "Cutting Efficiency: Strong understanding of timing when defenders overplay.\n\nSprinting Into Space: Excellent relocation and spacing.\n\nCatch & Triple Threat Setup: Textbook fundamentals.\n\nScreen Reads & Relocation: High basketball IQ; reads on- and off-ball screens well."
+},
+
+/* 7 */
+{
+  title: "Defensive Profile",
+  tag: "Defense",
+  desc: "On-ball and team defense.",
+  content: "On-Ball Defense: Solid positional defender vs similar size.\n\nDrive Defense: Uses body well but lacks elite lateral speed.\n\nFoul Discipline: Excellent; contests vertically.\n\nSteals & Blocks: None observed; impact via positioning.\n\nTeam & Help Defense: Intelligent rotations and timely paint help.\n\nCommunication: Grade 4/5; actively communicates."
+},
+
+/* 8 */
+{
+  title: "Rebounding & Positioning",
+  tag: "Rebounding",
+  desc: "Glass work and positioning.",
+  content: "Rebounds per Game: Extremely active and effective.\n\nBox Outs: Technically sound; finds body early.\n\nRebound Contests: Aggressive in traffic.\n\nMobility in Traffic: Navigates bodies well with high motor."
+},
+
+/* 9 */
+{
+  title: "Transition Game",
+  tag: "Transition",
+  desc: "Offensive and defensive transition.",
+  content: "Offensive Transition: Sprints to perimeter to space floor.\n\nPassing in Transition: Limited; primarily finisher or spacer.\n\nTransition Defense: Strong sprint-back effort; communicates matchups."
+},
+
+/* 10 */
+{
+  title: "Impact Metrics (Observational)",
+  tag: "Analytics",
+  desc: "Estimated advanced impact.",
+  content: "Net Impact: Observationally positive.\n\nTouches: Mostly perimeter, catch-and-shoot.\n\nTurnovers: Low on drives and passes.\n\nTeam Impact: Spacing and rebounding significantly boost lineup efficiency."
+},
+
+/* 11 */
+{
+  title: "Intangibles & Role Fit",
+  tag: "Intangibles",
+  desc: "Non-statistical impact.",
+  content: "Leadership Presence: 4/5.\n\nCoachability: 5/5.\n\nScreen Assists: Solid but not primary role.\n\nCharges Taken: None observed.\n\nEnergy & Hustle: High motor, consistent effort."
+},
+
+/* 12 */
+{
+  title: "Scouting Summary",
+  tag: "Summary",
+  desc: "Overall player archetype.",
+  content: "Player Archetype: Stretch Big / Elite Floor Spacer.\n\nKey Strengths: Elite catch-and-shoot shooting, rebounding, high IQ, strong fundamentals.\n\nAreas for Development: Weak-hand handling, counter moves, left-side finishing.\n\nIdeal System Fit: Motion offense emphasizing spacing and ball movement."
+},
+
+/* 13 */
+{
+  title: "Overall Data Grid",
+  tag: "Ratings",
+  desc: "Category-level evaluation.",
+  content: "Offense: Shooting (Elite), Ball Handling (Functional), Finishing (Good).\n\nDefense: Positional defense strong, transition defense good.\n\nRebounding: Excellent.\n\nIntangibles: Elite basketball IQ, motor, and communication."
+},
+
+/* 14 */
+{
+  title: "Biomechanical Analysis Report",
+  tag: "Biomechanics",
+  desc: "Movement efficiency and risk profile.",
+  content: "Key Strength: Kinetic chain efficiency in jump shot.\n\nPrimary Improvement Area: Hip and ankle mobility in defensive stance.\n\nOverall: Durable, efficient shooting motion with low joint stress."
+},
+
+/* 15 */
+{
+  title: "Jump Shot Analysis",
+  tag: "ShootingBiomech",
+  desc: "Detailed shooting mechanics.",
+  content: "Base & Balance: Excellent, stable platform.\n\nShot Pocket & Dip: Efficient, consistent.\n\nEnergy Transfer: Near-perfect kinetic sequence.\n\nSet Point: High and consistent.\n\nRelease & Follow-Through: Textbook mechanics."
+},
+
+/* 16 */
+{
+  title: "Defensive Movement Analysis",
+  tag: "DefenseBiomech",
+  desc: "Lateral and stance mechanics.",
+  content: "Stance: Slightly upright; needs deeper hip hinge.\n\nCenter of Gravity: Pops up slightly on slides.\n\nLateral Movement: Functional but lacks elite explosiveness.\n\nDirection Changes: Stable with no valgus collapse."
+},
+
+/* 17 */
+{
+  title: "Jumping Analysis (Blocks & Rebounds)",
+  tag: "Jumping",
+  desc: "Takeoff and landing mechanics.",
+  content: "Approach: Two-foot jumper in traffic.\n\nTakeoff: Good knee and hip flexion.\n\nLanding: Mostly controlled; occasional stiff landings in traffic."
+},
+
+/* 18 */
+{
+  title: "Actionable Recommendations",
+  tag: "Development",
+  desc: "Coaching and player drills.",
+  content: "Coaching Cues: Trust shooting form; sit lower defensively; land soft.\n\nPlayer Drills: Mini-band defensive slides, full-court weak-hand dribbling, form rebound landings."
+},
+
+/* 19 */
+{
+  title: "Injury Risk Assessment",
+  tag: "Injury",
+  desc: "Risk and prevention.",
+  content: "Ankle Sprains: Low risk.\n\nPatellar Tendonitis: Moderate risk due to jump volume.\n\nACL Injury: Low risk; good control.\n\nPrevention: Mobility, strength, and landing mechanics."
+},
+
+/* 20 */
+{
+  title: "Biomechanics Summary",
+  tag: "SummaryBiomech",
+  desc: "Final biomechanical outlook.",
+  content: "Elite, repeatable shooting motion ensures durability. Improving hip mobility and defensive stance will enhance agility and reduce knee stress."
+}
+        ]
+      },
+      //soccer
+      soccer: {
+        goalkeeper: [
+          {
+    title: "Player Information",
+    tag: "Profile",
+    desc: "Goalkeeper analysis context.",
+    content: "",
+    metrics: [
+      ["Player Name", "Samuel Toaldo"],
+      ["Date of Analysis", "2023-10-27"],
+      ["Analyzing Coach", "Elite Goalkeeping Coach & Performance Analyst"],
+      ["Session Focus", "Technical Handling"]
+    ],
+    showPlayerInfo: true
+  },
+  {
+    title: "Scenario Synopsis",
+    tag: "Context",
+    desc: "Drill environment and overall impression.",
+    content: "The session features close-range (8–10 yards) repetitive handling drills with no defensive pressure.\n\nServices Included:\n• Rolled ground balls\n• Mid-range driven shots\n• Tossed chest and head-height balls\n\nOverall Impression: Solid understanding of body alignment, but inefficiencies in set position, hand readiness, and absorption mechanics limit effectiveness under game-speed conditions.",
+    metrics: []
+  },
+  {
+    title: "Ground Balls & Low Shots",
+    tag: "Low Handling",
+    desc: "Biomechanical and technical evaluation.",
+    content: "Set Position\n\n• Stance adequate but static\n• Weight not consistently on balls of feet\n\nHand Position: Correctly low and in front\n\nFootwork: Effective for drill context\n\nCatching Technique\n\n• Scoop shape attempted but inconsistent\n• Body consistently behind ball\n\nExecution Rating: 3/5\n\nPrimary refinement needed: consistent secure hand contour",
+    metrics: []
+  },
+  {
+    title: "Mid-Range Shots",
+    tag: "Mid Handling",
+    desc: "Basket catch and absorption mechanics.",
+    content: "Stance: Too upright\nHand Position: Starts too low, causing delayed reaction\n\nCatching Technique\n\n• W-shape inconsistent\n• Arms too rigid\n• Catch made too close to torso\n\nExecution Rating: 2/5\n\nRisk: Increased rebound potential under power shots",
+    metrics: []
+  },
+  {
+    title: "Chest & Head Height Shots",
+    tag: "High Handling",
+    desc: "Contour catch evaluation.",
+    content: "Hands set too low\nWeight often on heels\n\nPositive: Steps forward into line of ball\n\nIssue: Catch made too close to face/chest\n\nIdeal Technique: Full arm extension, then retract\n\nExecution Rating: 3/5",
+    metrics: []
+  },
+  {
+    title: "High Balls & Aerials",
+    tag: "Aerials",
+    desc: "Aerial handling assessment.",
+    content: "Body alignment underneath flight path is good.\n\nIssue: Allows ball to drop too low before catching.\n\nExecution Rating: 3/5\n\nCorrection: Attack ball at highest point with arms extended.",
+    metrics: []
+  },
+  {
+    title: "Outcome Analysis",
+    tag: "Outcome",
+    desc: "Result vs efficiency.",
+    content: "Catch Rate: 100%\n\nEfficiency Rating: 3/5\n\nDespite successful outcomes, inefficient mechanics would reduce success under game pressure.",
+    metrics: []
+  },
+  {
+    title: "Summary & Recommendations",
+    tag: "Summary",
+    desc: "Strengths and corrective focus.",
+    content: "Key Strengths\n\n• Consistent body positioning\n• Positive forward intent\n• Secure handling in controlled environment\n\nPrimary Development Areas\n\n• Adaptive set position\n• Soft-hand absorption mechanics\n\nCorrective Drills\n\n1. Set-and-Catch Mirroring\n2. Rebound Board Reception\n\nKey Cue: \"Reach, Stick, Pull\"",
+    metrics: []
+  }
+        ],
+        shooting: [
+            {
+    title: "Player Information",
+    tag: "Profile",
+    desc: "Basic player and tactical context.",
+    content: "",
+    metrics: [
+      ["Player Name", "Declan Donigher"],
+      ["Team", "USL Academy U20/U19"],
+      ["Jersey Number", "#7 (Black)"],
+      ["Position", "Center Forward (9)"],
+      ["Formation Context", "4-3-3"]
+    ],
+    showPlayerInfo: true
+  },
+  {
+    title: "Quantitative Analysis",
+    tag: "Data",
+    desc: "Objective shot, pass, and involvement metrics.",
+    content: "Shooting Output\n\nShots on Target: 2\n• 0:36 – Right-footed shot from outside the box, saved\n• 0:48 – Left-footed shot inside the box, saved\n\nShots Off Target: 3\n• 0:20 – Header wide from cross\n• 0:40 – Right-footed shot from edge of box, wide\n• 1:01 – Long-range right-footed shot, wide\n\nGoals Scored: 1\n• 0:07 – Right-footed finish\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nFinal Third Contribution\n\nCompleted Passes (Final Third): 6\n• Mostly one-touch layoffs to midfield support\n\nIncomplete Passes (Final Third): 2\n• Occurred while attempting to turn under pressure\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nReceiving & Touch Profile\n\nReceives Facing Goal: 3 times\n• Typically during runs in behind\n\nReceives Back to Goal: 7 times\n• Primary role in build-up as a target forward\n\nTouches Inside Penalty Area: 5\n• 2 (goal), 1 (header), 2 (left-footed shot)\n\nOne-Touch Actions: 5 (4 passes, 1 shot/header)\nMulti-Touch Actions: 8",
+    metrics: []
+  },
+  {
+    title: "Technical Execution Analysis",
+    tag: "Technique",
+    desc: "Evaluation of shooting, passing, and ball control technique.",
+    content: "Shot Release Speed\n\nDeclan releases shots quickly, often using one touch to set and the second to finish. Minimal hesitation reflects strong striker instincts.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nFoot Usage\n\nBoth Feet: Confident with right and left\n• Goal scored with right foot (0:07)\n• Dangerous left-footed effort saved (0:48)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nFirst Touch & Ball Control\n\nInside Foot: Frequently used for control and layoffs\nOutside Foot: Occasionally used (notably on goal to create shooting angle)\nUpper Body Control: Chest (0:31), Thigh (0:58)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nPassing & Shooting Surfaces\n\nPassing: Inside of the foot (accuracy-focused)\nShooting: Instep/Laces & firm inside foot\n\nBall Trajectory: Passes kept on the ground; shots driven low\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nHead Position\n\nPre-reception: Head up, scanning\nExecution: Head down and over the ball during strike",
+    metrics: []
+  },
+  {
+    title: "Biomechanical Analysis",
+    tag: "Biomechanics",
+    desc: "Lower-body positioning and shooting mechanics.",
+    content: "Plant Foot Placement\n\n• Positioned level with or slightly behind the ball\n• Never in front of the ball\n• Distance: Approx. 6–12 inches\n\nThis positioning allows balance, clean hip rotation, and low shot trajectory.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nShooting Foot Usage\n\n• Instep/Laces: Power shots\n• Inside Foot: Controlled placement (goal finish)",
+    metrics: []
+  },
+  {
+    title: "Overall Assessment",
+    tag: "Assessment",
+    desc: "Pros, cons, and development recommendations.",
+    content: "Pros\n\n1. Intelligent Movement – Excellent timing on runs in behind\n2. Finishing Instinct – Quick decision-making and shot release\n3. Two-Footed Threat – Increases unpredictability\n4. Link-Up Play – Reliable one-touch layoffs\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nCons\n\n1. Turning Under Pressure – Struggles when holding and turning\n2. Shot Accuracy – 3 of 5 attempts off target\n3. Physical Hold-Up Strength – Can be outmuscled\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nRecommendations\n\n1. Back-to-Goal Turn Drills (scan, shield, explode)\n2. Composed Finishing Under Pressure (target > power)\n3. Strength & Conditioning (core + lower body)",
+    metrics: []
+  },
+  {
+    title: "Overall Coaching Analysis",
+    tag: "Projection",
+    desc: "Tactical profile and future projection.",
+    content: "Declan operates as a modern #9, balancing scoring and facilitation. In a 4-3-3, he serves as a central reference point—stretching defenses with runs in behind or linking play by dropping deep.\n\nHis decisiveness, two-footed finishing, and clean link-up play make him effective at USL Academy level. To progress toward USL Championship or MLS Next Pro, the key step is evolving his hold-up play under physical pressure.\n\nWith targeted strength training and scenario-based drills, Declan projects as a complete, high-level Center Forward.",
+    metrics: []
+  }
+          
+        ]
+      },
+      fencing: {
+        full_game: [
+          {
+    title: "Player Information",
+    tag: "Profile",
+    desc: "Fencer roles and bout context.",
+    content: "",
+    metrics: [
+      ["Left Fencer", "Samarth Kumbla"],
+      ["Right Fencer", "Ben Shih"],
+      ["Weapon", "Foil"],
+      ["Samarth Position", "Left"],
+      ["Ben Position", "Right"]
+    ],
+    showPlayerInfo: true
+  },
+
+  {
+    title: "Overview & Initial Assessment",
+    tag: "Overview",
+    desc: "General style, tendencies, strengths, and weaknesses.",
+    content: "Samarth Kumbla (Left Fencer)\n\nStyle: Aggressive, direct, proactive. Prefers setting the pace and initiating first-intention attacks with minimal preparation. Relies heavily on speed and commitment.\n\nStrengths:\n• Strong, committed direct attacks\n• Explosive initial burst\n• Effective first-intention scoring\n• Quick remises/redoublements\n\nWeaknesses:\n• Predictable attack patterns\n• Slow or unbalanced recovery after deep lunges\n• Wide and late parries\n• Minimal blade preparation\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nBen Shih (Right Fencer)\n\nStyle: Reactive, patient, defensive. Absorbs pressure, manages distance, and capitalizes on opponent mistakes.\n\nStrengths:\n• Strong distance management\n• Effective parry-riposte actions\n• Composed under pressure\n• Balanced and efficient footwork\n\nWeaknesses:\n• Limited offensive initiative\n• Occasionally hesitant attacks\n• Ripostes not always immediate\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nWeapon Identification\n\nThe bout is fenced with Foil, evident from torso-only target area and right-of-way application.",
+    metrics: []
+  },
+
+  {
+    title: "Technical Execution",
+    tag: "Technique",
+    desc: "Blade work, attacks, and footwork mechanics.",
+    content: "Point Control\n\nSamarth Kumbla:\n• Strong on direct lunges\n• Less precise on complex actions\n• Misses widely during parries/remises\n\nBen Shih:\n• Stable and controlled point work\n• Effective on parry-ripostes\n• Misses are timing-related, not technical\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nParries\n\nSamarth:\n• Attempts parry 4 & 6\n• Often wide, late, inconsistent\n• Leads to doubles or lost priority\n\nBen:\n• Strong parry 4\n• Compact, timely, efficient\n• Immediate riposte conversion\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nOffensive Actions\n\nSamarth:\n• Direct advance-lunge\n• Minimal compound attacks\n• Occasional remise\n\nBen:\n• Parry-riposte primary offense\n• Counter-attacks on wide misses\n• Rare compound attacks\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nAttack Structure\n\nSamarth: Advance-lunge only, no fleche\nBen: Advance-lunge and short riposte lunges\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nFootwork\n\nSamarth:\n• Explosive forward movement\n• Heavy recovery after lunges\n• Limited agility in retreats\n\nBen:\n• Efficient retreats\n• Balanced posture\n• Moderate forward explosiveness",
+    metrics: []
+  },
+
+  {
+    title: "Tactical Awareness",
+    tag: "Tactics",
+    desc: "Distance, priority, and weapon strategy.",
+    content: "Distance Management\n\nSamarth:\n• Prefers medium-long lunge distance\n• Closes distance aggressively\n• Limited close-range control\n\nBen:\n• Defensive retreat-based distance\n• Draws opponent into errors\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nRight of Way (Priority)\n\nSamarth:\n• Gains priority through speed\n• Loses it after missed/parried attacks\n\nBen:\n• Gains priority via parry-riposte\n• Strong counter-attack timing\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nWeapon Strategy\n\nSamarth:\n• Simple, force-based attack pattern\n• Minimal tactical variation\n\nBen:\n• Reactive defense\n• Distance + parry combination\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nTactical Adjustments\n\nSamarth: Minimal adaptation, repeats favored attacks\nBen: Adjusts distance and timing to exploit predictability",
+    metrics: []
+  },
+
+  {
+    title: "Defensive Skills & Timing",
+    tag: "Defense",
+    desc: "Parries, counters, and timing control.",
+    content: "General Defense\n\nSamarth:\n• Reactive and flat-footed\n• Moderate effectiveness\n\nBen:\n• Light, prepared posture\n• Strong defensive efficiency\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nCounter-Attacks\n\nSamarth:\n• Rare and ineffective\n\nBen:\n• Frequent, well-timed\n• Successful against over-commitment\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nTiming\n\nSamarth:\n• First-intention timing\n• Predictable initiation\n\nBen:\n• Second-intention timing\n• Excellent counter-timing during opponent commitment",
+    metrics: []
+  },
+
+  {
+    title: "Bout Management & Strategy",
+    tag: "Management",
+    desc: "Momentum, adaptation, and pressure response.",
+    content: "Samarth Kumbla\n\n• Maintains aggression regardless of score\n• Struggles to regain momentum after disruption\n• Relies on repetition over adjustment\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nBen Shih\n\n• Maintains composed strategy\n• Breaks opponent rhythm with defense\n• Manages momentum through precision\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nUnder Pressure\n\nSamarth: Limited tactical change\nBen: Maintains discipline and clarity",
+    metrics: []
+  },
+
+  {
+    title: "Touch Location Analysis",
+    tag: "Touches",
+    desc: "Body and strip positioning.",
+    content: "Target Area\n\nSamarth:\n• Torso (center mass)\n\nBen:\n• Upper chest / shoulder via riposte\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nStrip Location\n\nSamarth:\n• Middle to forward half\n\nBen:\n• Middle to rear third (draw-in strategy)",
+    metrics: []
+  },
+
+  {
+    title: "Comparative Analysis",
+    tag: "Comparison",
+    desc: "Comparison with elite fencing standards.",
+    content: "Current Level\n\n• Heavy reliance on simple actions\n• Limited tactical depth\n• Minimal tempo variation\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nElite Level Contrast\n\n• Compound attacks\n• Tempo changes\n• Pre-emptive defense\n• Psychological pressure\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nConclusion\n\nFundamentals present, but elite fencing demands greater precision, adaptability, and layered tactics.",
+    metrics: []
+  },
+
+  {
+    title: "Comparison Chart",
+    tag: "Chart",
+    desc: "Side-by-side technical comparison.",
+    content: "",
+    metrics: [
+      ["General Style", "Aggressive & Direct", "Reactive & Patient"],
+      ["Primary Offense", "Advance-Lunge", "Parry-Riposte"],
+      ["Parries", "Wide & Inconsistent", "Precise & Timely"],
+      ["Footwork Defense", "Slow Recovery", "Efficient Retreats"],
+      ["Tactical Adaptation", "Limited", "Strong"],
+      ["Risk Level", "High", "Moderate"]
+    ]
+  },
+
+  {
+    title: "Fencing Scorecard",
+    tag: "Scorecard",
+    desc: "Performance evaluation summary.",
+    content: "",
+    metrics: [
+      ["Samarth Kumbla Total", "29 / 60"],
+      ["Ben Shih Total", "45 / 60"],
+      ["Technical Winner", "Ben Shih"],
+      ["Weapon", "Foil"]
+    ],
+    showSummary: true,
+    summaryText: "While Samarth Kumbla demonstrates strong aggression and speed, Ben Shih’s superior timing, defensive structure, and tactical discipline provide a more sustainable and higher-level fencing model."
+  }
+        ]
+      },
+      softball: {
+        hitting_analysis: [
+          { 
+            title: "Hitting Consistency", 
+            tag: "Batting", 
+            desc: "Contact quality and timing.", 
+            metrics: [
+              ["Contact %", "84%"], 
+              ["Hard Hits", "5"], 
+              ["Launch", "16°"], 
+              ["Strikeouts", "1"]
+            ]
+          },
+          { 
+            title: "Power Analysis", 
+            tag: "Power", 
+            desc: "Exit velocity and distance.", 
+            metrics: [
+              ["Exit Velo", "78 mph"], 
+              ["Max Distance", "245 ft"], 
+              ["Hard Hit %", "45%"], 
+              ["Barrel Rate", "38%"]
+            ]
+          },
+          { 
+            title: "Plate Discipline", 
+            tag: "IQ", 
+            desc: "Pitch selection and zone control.", 
+            metrics: [
+              ["Walk Rate", "12%"], 
+              ["Chase Rate", "22%"], 
+              ["Zone Swing %", "68%"], 
+              ["Pitch Recognition", "A-"]
+            ]
+          },
+          { 
+            title: "Contact Quality", 
+            tag: "Contact", 
+            desc: "Sweet spot and line drive rates.", 
+            metrics: [
+              ["Sweet Spot %", "41%"], 
+              ["Line Drive %", "28%"], 
+              ["Ground Ball %", "42%"], 
+              ["Fly Ball %", "30%"]
+            ]
+          }
+        ]
+      }
+    };
+
+
+    // State
+    let currentSport = 'soccer'; // Changed default to soccer for testing
+    let currentReportType = 'shooting'; // Changed to shooting
+    let currentReportIndex = 0;
+
+    // Elements
+    const sportTabs = document.querySelectorAll('.sport-tab');
+    const reportTypeSelector = document.getElementById('reportTypeSelector');
+    const reportTypeTabs = document.getElementById('reportTypeTabs');
+    const reportCards = document.getElementById('reportCards');
+    const sidebarSportName = document.getElementById('sidebarSportName');
+    const previewKicker = document.getElementById('previewKicker');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDesc = document.getElementById('previewDesc');
+    const metricsGrid = document.getElementById('metricsGrid');
+    const playerInfoGrid = document.getElementById('playerInfoGrid');
+    const playerInfoSection = document.getElementById('playerInfoSection');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSubtitle = document.getElementById('modalSubtitle');
+    const modalContent = document.getElementById('modalContent');
+    const modalAction = document.getElementById('modalAction');
+
+    // Functions
+    function getSportLabel(sport) {
+      const labels = {
+        icehockey: 'Ice Hockey',
+        baseball: 'Baseball',
+        basketball: 'Basketball',
+        soccer: 'Soccer',
+        fencing: 'Fencing',
+        softball: 'Softball'
+      };
+      return labels[sport] || sport;
+    }
+
+    function renderReportTypes() {
+      const reportTypes = REPORT_TYPES[currentSport] || [];
+      
+      if (reportTypes.length === 0) {
+        reportTypeSelector.style.display = 'none';
+        return;
+      }
+      
+      reportTypeSelector.style.display = 'block';
+      
+      reportTypeTabs.innerHTML = reportTypes.map(type => `
+        <div class="report-type-tab ${type.id === currentReportType ? 'active' : ''}" 
+             onclick="selectReportType('${type.id}')">
+          ${type.name}
+        </div>
+      `).join('');
+    }
+
+    function renderPlayerInfo() {
+      const sportData = DATA[currentSport] || {};
+      const reports = sportData[currentReportType] || [];
+      const currentReport = reports[currentReportIndex];
+
+      // KEY FIX: Only show player info section if explicitly marked
+      // AND never include it in metrics content
+      if (!currentReport?.showPlayerInfo) {
+        playerInfoSection.classList.remove('show');
+        return;
+      }
+
+      playerInfoSection.classList.add('show');
+
+      // Handle baseball special cases
+      if (currentSport === 'baseball') {
+        const playerInfo = PLAYER_INFO.baseball[currentReportType];
+        
+        if (currentReportType === 'hitting') {
+          playerInfoGrid.innerHTML = `
+            <div class="player-info-item">
+              <div class="player-info-label">Player Name</div>
+              <div class="player-info-value">${playerInfo.name}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Age</div>
+              <div class="player-info-value">${playerInfo.age}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Height</div>
+              <div class="player-info-value">${playerInfo.height}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Weight</div>
+              <div class="player-info-value">${playerInfo.weight}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Bats/Throws</div>
+              <div class="player-info-value">${playerInfo.batsThrows}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Developmental Level</div>
+              <div class="player-info-value">${playerInfo.level}</div>
+            </div>
+          `;
+        } else if (currentReportType === 'pitching') {
+          playerInfoGrid.innerHTML = `
+            <div class="player-info-item">
+              <div class="player-info-label">Name</div>
+              <div class="player-info-value">${playerInfo.name}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Age</div>
+              <div class="player-info-value">${playerInfo.age}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Height (inches)</div>
+              <div class="player-info-value">${playerInfo.height}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Weight (lbs)</div>
+              <div class="player-info-value">${playerInfo.weight}</div>
+            </div>
+            <div class="player-info-item">
+              <div class="player-info-label">Throws/Bats</div>
+              <div class="player-info-value">${playerInfo.throwsBats}</div>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // Handle other sports
+      const playerInfo = PLAYER_INFO[currentSport];
+      const jerseyColor = JERSEY_COLORS[playerInfo.jerseyColor] || '#666666';
+      
+      let infoItems = [
+        { label: 'Name', value: playerInfo.name },
+        { label: 'Jersey Number', value: playerInfo.jerseyNumber },
+        { 
+          label: 'Jersey Color', 
+          value: `${playerInfo.jerseyColor}<span class="jersey-color-badge" style="background-color: ${jerseyColor}; ${playerInfo.jerseyColor === 'White' ? 'border-color: #d4d4d4;' : ''}"></span>` 
+        },
+        { label: 'Age', value: playerInfo.age },
+        { label: 'Position', value: playerInfo.position },
+        { label: 'Level', value: playerInfo.level }
+      ];
+      
+      if (playerInfo.shot) {
+        infoItems.splice(5, 0, { label: 'Shot', value: playerInfo.shot });
+      } else if (playerInfo.bats) {
+        infoItems.splice(5, 0, { label: 'Bats', value: playerInfo.bats });
+      } else if (playerInfo.shoots) {
+        infoItems.splice(5, 0, { label: 'Shoots', value: playerInfo.shoots });
+      } else if (playerInfo.foot) {
+        infoItems.splice(5, 0, { label: 'Foot', value: playerInfo.foot });
+      } else if (playerInfo.hand) {
+        infoItems.splice(5, 0, { label: 'Hand', value: playerInfo.hand });
+      }
+
+      playerInfoGrid.innerHTML = infoItems.map(item => `
+        <div class="player-info-item">
+          <div class="player-info-label">${item.label}</div>
+          <div class="player-info-value">${item.value}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderReportCards() {
+      const sportData = DATA[currentSport] || {};
+      const reports = sportData[currentReportType] || [];
+      
+      reportCards.innerHTML = reports.map((report, index) => `
+        <div class="report-card ${index === currentReportIndex ? 'active' : ''}" onclick="selectReport(${index})">
+          <div class="report-header">
+            <div class="report-title">${report.title}</div>
+            <div class="report-tag">${report.tag}</div>
+          </div>
+          <div class="report-desc">${report.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderPreview() {
+      const sportData = DATA[currentSport] || {};
+      const reports = sportData[currentReportType] || [];
+      const report = reports[currentReportIndex];
+      
+      if (!report) return;
+
+      sidebarSportName.textContent = getSportLabel(currentSport);
+      previewKicker.textContent = getSportLabel(currentSport).toUpperCase();
+      previewTitle.textContent = report.title;
+      previewDesc.textContent = report.desc;
+
+      // KEY FIX: Never include player info metrics in the metrics grid
+      // The player info section is rendered separately above
+      
+      // Handle table display
+      if (report.showTable && report.tableData) {
+        metricsGrid.innerHTML = `
+          <div style="grid-column: 1/-1; background: white; border: 2px solid var(--border); border-radius: 16px; padding: 32px; overflow-x: auto;">
+            <table class="mechanics-table">
+              <thead>
+                <tr>
+                  ${report.tableData.headers.map(header => `<th>${header}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${report.tableData.rows.map(row => `
+                  <tr>
+                    <td>${row[0]}</td>
+                    <td>${row[1]}</td>
+                    <td class="rating-cell">${row[2]}</td>
+                    <td>${row[3]}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      // Handle content display
+      else if (report.content || report.showSummary) {
+        let htmlContent = '';
+        
+        if (report.content) {
+          htmlContent = `
+            <div style="white-space: pre-wrap; line-height: 1.8; color: var(--text-primary); font-size: 15px;">
+              ${report.content}
+            </div>
+          `;
+        }
+
+        if (report.showSummary && report.summaryText) {
+          htmlContent += `
+            <div style="margin-top: 32px; border-top: 2px solid var(--border); padding-top: 24px;">
+              <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px; color: var(--text-primary);">Summary</h3>
+              <div style="background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 20px; line-height: 1.8;">
+                ${report.summaryText}
+              </div>
+            </div>
+          `;
+        }
+        
+        // KEY FIX: Only show metrics if report has them AND is not marked as showPlayerInfo
+        // This prevents the duplicate display
+        if (report.metrics && report.metrics.length > 0 && !report.showPlayerInfo) {
+          htmlContent += `
+            <div style="margin-top: 32px; border-top: 2px solid var(--border); padding-top: 24px;">
+              <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--text-primary);">Key Metrics</h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+                ${report.metrics.map(([label, value]) => `
+                  <div style="background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 16px;">
+                    <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; letter-spacing: 0.3px;">${label}</div>
+                    <div style="font-size: 24px; font-weight: 900; color: var(--text-primary); letter-spacing: -0.5px;">${value}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        metricsGrid.innerHTML = `
+          <div style="grid-column: 1/-1; background: white; border: 2px solid var(--border); border-radius: 16px; padding: 32px;">
+            ${htmlContent}
+          </div>
+        `;
+      }
+      // Handle metric cards (only if not a player info report)
+      else if (!report.showPlayerInfo) {
+        metricsGrid.innerHTML = report.metrics.map(([label, value]) => `
+          <div class="metric-card">
+            <div class="metric-label">${label}</div>
+            <div class="metric-value">${value}</div>
+            <div class="metric-footer">Updated now • Live data</div>
+          </div>
+        `).join('');
+      }
+
+      renderPlayerInfo();
+    }
+
+    function selectSport(sport) {
+      currentSport = sport;
+      
+      const reportTypes = REPORT_TYPES[sport] || [];
+      currentReportType = reportTypes.length > 0 ? reportTypes[0].id : null;
+      currentReportIndex = 0;
+
+      sportTabs.forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.sport === sport);
+      });
+
+      renderReportTypes();
+      renderReportCards();
+      renderPreview();
+    }
+
+    function selectReportType(typeId) {
+      currentReportType = typeId;
+      currentReportIndex = 0;
+      
+      renderReportTypes();
+      renderReportCards();
+      renderPreview();
+    }
+
+    function selectReport(index) {
+      currentReportIndex = index;
+      renderReportCards();
+      renderPreview();
+    }
+
+    function openModal() {
+      const sportData = DATA[currentSport] || {};
+      const reports = sportData[currentReportType] || [];
+      const report = reports[currentReportIndex];
+      
+      if (!report) return;
+
+      modalTitle.textContent = report.title;
+      modalSubtitle.textContent = report.desc;
+
+      modalContent.innerHTML = `
+        <div class="modal-section">
+          <h3>Report Metrics</h3>
+          <ul class="modal-list">
+            ${report.metrics.map(([label, value]) => `
+              <li><strong>${label}:</strong> ${value}</li>
+            `).join('')}
+          </ul>
+        </div>
+        <div class="modal-section">
+          <h3>Next Actions</h3>
+          <ul class="modal-list">
+            <li>Download detailed PDF report</li>
+            <li>Share with coaching staff</li>
+            <li>Schedule follow-up analysis</li>
+            <li>Export data to external system</li>
+          </ul>
+        </div>
+      `;
+
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Event Listeners
+    sportTabs.forEach(tab => {
+      tab.addEventListener('click', () => selectSport(tab.dataset.sport));
+    });
+    
+    modalAction.addEventListener('click', () => {
+      alert('Action functionality will be implemented based on your requirements');
+      closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        closeModal();
+      }
+    });
+
+    // Initialize
+    renderReportTypes();
+    renderReportCards();
+    renderPreview();
+  </script>
+</body>
+</html>
